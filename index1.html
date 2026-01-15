@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>🎡 วงล้อจับของขวัญปีใหม่</title>
+<link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<style>
+body{
+ font-family:'Prompt',sans-serif;
+ background:radial-gradient(circle,#001f3f,#001020);
+ color:#fff;
+ text-align:center;
+}
+canvas{background:#fff;border-radius:50%;margin-top:20px;}
+button{
+ font-size:20px;
+ padding:12px 30px;
+ border:none;
+ border-radius:30px;
+ margin:15px;
+ cursor:pointer;
+}
+.spin{background:#f1c40f;}
+.reset{background:#e74c3c;color:#fff;}
+#result{font-size:28px;margin:20px;}
+</style>
+</head>
+<body>
+
+<h1>🎄 วงล้อสุ่มจับของขวัญปีใหม่ 🎁</h1>
+
+<canvas id="wheel" width="500" height="500"></canvas><br>
+
+<button class="spin" onclick="spin()">🎡 หมุนวงล้อ (10 วินาที)</button>
+<button class="reset" onclick="reset()">🔄 รีเซ็ต</button>
+
+<div id="result"></div>
+
+<script>
+let names=[
+ "นายคมกฤษ วิเศษ","นายอัษฎาวุธ สอนพรหม","นางณภัทร นาชัยเงิน",
+ "นายปฏิพงษ์ ศรีวิบูลย์","นส.วนิชนก หงษ์เอก",
+ // 👉 ใส่รายชื่อทั้งหมดของคุณตรงนี้ได้เลย
+];
+
+let original=[...names];
+let canvas=document.getElementById("wheel");
+let ctx=canvas.getContext("2d");
+let angle=0;
+let spinning=false;
+
+function drawWheel(){
+ let slice=2*Math.PI/names.length;
+ ctx.clearRect(0,0,500,500);
+ names.forEach((name,i)=>{
+  ctx.beginPath();
+  ctx.fillStyle=`hsl(${i*360/names.length},70%,60%)`;
+  ctx.moveTo(250,250);
+  ctx.arc(250,250,240,angle+i*slice,angle+(i+1)*slice);
+  ctx.fill();
+  ctx.save();
+  ctx.translate(250,250);
+  ctx.rotate(angle+(i+0.5)*slice);
+  ctx.textAlign="right";
+  ctx.fillStyle="#000";
+  ctx.font="16px Prompt";
+  ctx.fillText(name,230,5);
+  ctx.restore();
+ });
+}
+
+drawWheel();
+
+function spin(){
+ if(spinning||names.length===0)return;
+ spinning=true;
+ let duration=10000;
+ let start=Date.now();
+
+ let timer=setInterval(()=>{
+  let t=Date.now()-start;
+  angle+=0.3*(1-t/duration);
+  drawWheel();
+
+  if(t>=duration){
+   clearInterval(timer);
+   spinning=false;
+   pick();
+  }
+ },20);
+}
+
+function pick(){
+ let slice=2*Math.PI/names.length;
+ let index=Math.floor(((2*Math.PI-angle)%(2*Math.PI))/slice);
+ let name=names[index];
+ document.getElementById("result").innerHTML="🎉 ได้รับของขวัญ:<br><b>"+name+"</b>";
+ confetti({particleCount:150,spread:120});
+ names.splice(index,1);
+ drawWheel();
+}
+
+function reset(){
+ names=[...original];
+ document.getElementById("result").innerHTML="";
+ drawWheel();
+}
+</script>
+
+</body>
+</html>
